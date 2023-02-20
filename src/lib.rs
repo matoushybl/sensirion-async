@@ -21,19 +21,11 @@ pub enum ParsingError {
     Crc,
 }
 
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Error<Inner: core::fmt::Debug> {
     Bus(Inner),
     Parsing(ParsingError),
-}
-
-#[cfg(feature = "defmt")]
-impl<E: embedded_hal_async::i2c::Error + defmt::Format> defmt::Format for Error<E> {
-    fn format(&self, fmt: defmt::Formatter) {
-        match self {
-            Error::Bus(e) => e.format(fmt),
-            Error::Parsing(e) => e.format(fmt),
-        }
-    }
 }
 
 impl<E: embedded_hal_async::i2c::Error> From<E> for Error<E> {
