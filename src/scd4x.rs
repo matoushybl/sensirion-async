@@ -142,6 +142,12 @@ where
             .await
     }
 
+    pub async fn data_ready(&mut self) -> Result<bool, Error<T::Error>> {
+        let ready = self.bus.read_word(SENSOR_ADDR, Command::GetDataReady, true).await?;
+
+        Ok(ready & 0x0b != 0)
+    }
+
     pub async fn read(&mut self) -> Result<Measurement, Error<T::Error>> {
         let mut result = [0u8; 9];
         self.bus
@@ -149,7 +155,7 @@ where
             .await?;
 
         #[cfg(feature = "defmt")]
-        defmt::error!("result: {:x}", result);
+        defmt::trace!("Raw data read from SCD4x: {:x}", result);
 
         let raw_temp = u16::from_be_bytes(result[3..5].try_into().unwrap());
         let raw_humidity = u16::from_be_bytes(result[6..8].try_into().unwrap());
@@ -163,9 +169,11 @@ where
 }
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Meter(pub u16);
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Celsius(pub f32);
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
