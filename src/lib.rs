@@ -1,5 +1,4 @@
 #![cfg_attr(not(test), no_std)]
-#![feature(type_alias_impl_trait)]
 
 pub mod scd30;
 pub mod scd4x;
@@ -9,19 +8,19 @@ pub mod sps30;
 mod vocalg;
 
 use crc_all::Crc;
-use embedded_hal_async::{delay::DelayUs, i2c::I2c};
+use embedded_hal_async::{delay::DelayNs, i2c::I2c};
 
 pub trait SensirionCommand {
     fn raw(&self) -> u16;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum ParsingError {
     Crc,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Error<Inner: core::fmt::Debug> {
     Bus(Inner),
@@ -121,11 +120,11 @@ where
         write_buffer: &[u8],
         read_buffer: &mut [u8],
         delay_ms: u32,
-        delay: &mut impl DelayUs,
+        delay: &mut impl DelayNs,
     ) -> Result<(), Error<T::Error>> {
         self.bus.write(address, write_buffer).await?;
 
-        delay.delay_ms(delay_ms).await.unwrap();
+        delay.delay_ms(delay_ms).await;
 
         self.bus.read(address, read_buffer).await?;
         Ok(())

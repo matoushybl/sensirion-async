@@ -3,8 +3,11 @@ name = "sensirion-async"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+defmt = ["dep:defmt", "embedded-hal-async/defmt-03"]
+
 [dependencies]
-embedded-hal-async = { version = "0.2.0-alpha.0" }
+embedded-hal-async = { version = "1.0.0" }
 defmt = { version = "0.3", optional = true }
 
 crc_all = "0.2.0"

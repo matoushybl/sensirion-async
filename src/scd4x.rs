@@ -143,7 +143,10 @@ where
     }
 
     pub async fn data_ready(&mut self) -> Result<bool, Error<T::Error>> {
-        let ready = self.bus.read_word(SENSOR_ADDR, Command::GetDataReady, true).await?;
+        let ready = self
+            .bus
+            .read_word(SENSOR_ADDR, Command::GetDataReady, true)
+            .await?;
 
         Ok(ready & 0x0b != 0)
     }

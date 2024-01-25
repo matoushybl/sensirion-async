@@ -1,4 +1,4 @@
-use embedded_hal_async::delay::DelayUs;
+use embedded_hal_async::delay::DelayNs;
 use embedded_hal_async::i2c::I2c;
 use getset::CopyGetters;
 
@@ -55,7 +55,7 @@ where
         &mut self,
         humidity: f32,
         temperature: f32,
-        delay: &mut impl DelayUs,
+        delay: &mut impl DelayNs,
     ) -> Result<Measurement, Error<T::Error>> {
         let raw = self.read_raw(humidity, temperature, delay).await?;
 
@@ -82,7 +82,7 @@ where
         &mut self,
         humidity: f32,
         temperature: f32,
-        delay: &mut impl DelayUs,
+        delay: &mut impl DelayNs,
     ) -> Result<u16, Error<T::Error>> {
         let write_data = raw_data_processing::compose_command(
             Command::MeasureRaw,
