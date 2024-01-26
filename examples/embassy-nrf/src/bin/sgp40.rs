@@ -4,15 +4,18 @@
 
 use embassy_nrf::config::Config;
 use embassy_nrf::gpio::Output;
-use embassy_nrf::twim::Twim;
+use embassy_nrf::twim::{self, Twim};
 
 use embassy_executor::Spawner;
-use embassy_nrf::interrupt;
+use embassy_nrf::{bind_interrupts, peripherals};
 use embassy_time::{Delay, Duration, Timer};
-use interrupt::InterruptExt;
 
 use example_embassy_nrf as _;
 use sensirion_async::sgp40::Sgp40;
+
+bind_interrupts!(struct Irqs {
+    SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0 => twim::InterruptHandler<peripherals::TWISPI0>;
+});
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -22,9 +25,7 @@ async fn main(_spawner: Spawner) {
         embassy_nrf::gpio::Level::Low,
         embassy_nrf::gpio::OutputDrive::Standard,
     );
-    let irq = interrupt::take!(SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0);
-    irq.set_priority(interrupt::Priority::P2);
-    let twi = Twim::new(p.TWISPI0, irq, p.P0_12, p.P0_11, Default::default());
+    let twi = Twim::new(p.TWISPI0, Irqs, p.P0_12, p.P0_11, Default::default());
     let mut sensor = Sgp40::new(twi);
 
     loop {
